@@ -85,6 +85,18 @@
 
     <build>
         <plugins>
+            <!-- Adicione este bloco dentro da tag <build> e <plugins> do seu pom.xml -->
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>11.7.2</version> <!-- Use a versão correta do Flyway -->
+                <configuration>
+                    <url>jdbc:mysql://localhost:3306/movieflix</url>
+                    <user>springstudent</user>
+                    <password>springstudent</password>
+                    <cleanDisabled>false</cleanDisabled>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
