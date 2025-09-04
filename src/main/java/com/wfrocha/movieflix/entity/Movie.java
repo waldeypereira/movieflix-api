@@ -1,10 +1,7 @@
 package com.wfrocha.movieflix.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.stereotype.Service;
@@ -16,6 +13,7 @@ import java.util.List;
 
 @Builder
 @Getter
+@Setter
 @Service
 @NoArgsConstructor
 @AllArgsConstructor
