@@ -1,17 +1,19 @@
 package com.wfrocha.movieflix.service;
 
+import com.wfrocha.movieflix.controller.request.MovieRequest;
 import com.wfrocha.movieflix.entity.Category;
 import com.wfrocha.movieflix.entity.Movie;
 import com.wfrocha.movieflix.entity.Streaming;
 import com.wfrocha.movieflix.repository.CategoryRepository;
 import com.wfrocha.movieflix.repository.MovieRepository;
 import com.wfrocha.movieflix.repository.StreamingRepository;
-import com.wfrocha.movieflix.controller.request.MovieRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,44 +31,56 @@ public class MovieService {
         return movieRepository.findById(id);
     }
 
-    public Movie save(Movie movie) {
-        // Carrega categorias e streamings completos antes de salvar
-        List<Category> categories = movie.getCategories().stream()
-                .map(cat -> categoryRepository.findById(cat.getId())
-                        .orElseThrow(() -> new RuntimeException("Category not found: " + cat.getId())))
-                .toList();
+    public Movie save(Movie request) {
+        List<Category> categories = request.getCategories() != null
+                ? request.getCategories().stream()
+                .map(category -> categoryRepository.findById(category.getId()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toCollection(ArrayList::new))
+                : new ArrayList<>();
 
-        List<Streaming> streamings = movie.getStreamings().stream()
-                .map(st -> streamingRepository.findById(st.getId())
-                        .orElseThrow(() -> new RuntimeException("Streaming not found: " + st.getId())))
-                .toList();
+        List<Streaming> streamings = request.getStreamings() != null
+                ? request.getStreamings().stream()
+                .map(streaming -> streamingRepository.findById(streaming.getId()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toCollection(ArrayList::new))
+                : new ArrayList<>();
 
-        movie.setCategories(categories);
-        movie.setStreamings(streamings);
+        Movie movie = Movie.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .releaseDate(request.getReleaseDate())
+                .rating(request.getRating())
+                .categories(categories)
+                .streamings(streamings)
+                .build();
 
         return movieRepository.save(movie);
     }
 
     public Movie update(long id, MovieRequest request) {
         return movieRepository.findById(id).map(existing -> {
-            // Atualiza categorias e streamings
+
             List<Category> categories = request.categories().stream()
-                    .map(catId -> categoryRepository.findById(catId)
-                            .orElseThrow(() -> new RuntimeException("Category not found: " + catId)))
-                    .toList();
+                    .map(categoryId -> categoryRepository.findById(categoryId))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toCollection(ArrayList::new));
 
             List<Streaming> streamings = request.streamings().stream()
-                    .map(stId -> streamingRepository.findById(stId)
-                            .orElseThrow(() -> new RuntimeException("Streaming not found: " + stId)))
-                    .toList();
+                    .map(streamingId -> streamingRepository.findById(streamingId))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toCollection(ArrayList::new));
 
-            // Atualiza campos existentes via setters
             existing.setTitle(request.title());
             existing.setDescription(request.description());
             existing.setReleaseDate(request.releaseDate());
             existing.setRating(request.rating());
-            existing.setCategories(categories);
-            existing.setStreamings(streamings);
+            existing.setCategories(categories);  // agora mutável
+            existing.setStreamings(streamings);  // agora mutável
 
             return movieRepository.save(existing);
         }).orElseThrow(() -> new RuntimeException("Movie not found"));

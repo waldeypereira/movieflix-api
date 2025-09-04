@@ -55,10 +55,14 @@ public class MovieController {
         return ResponseEntity.ok(MovieMapper.toMovieResponse(updatedMovie));
     }
 
-    // Deletar filme
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
-        movieService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deleteMovie(@PathVariable Long id) {
+        return movieService.findById(id)
+                .map(movie -> {
+                    movieService.deleteById(id);
+                    return ResponseEntity.ok("Filme com ID " + id + " deletado com sucesso!");
+                })
+                .orElseGet(() -> ResponseEntity.status(404)
+                        .body("Filme com ID " + id + " não encontrado"));
     }
 }

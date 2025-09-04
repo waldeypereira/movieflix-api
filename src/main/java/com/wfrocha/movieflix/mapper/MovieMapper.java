@@ -7,6 +7,7 @@ import com.wfrocha.movieflix.entity.Movie;
 import com.wfrocha.movieflix.entity.Streaming;
 import lombok.experimental.UtilityClass;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,16 +20,16 @@ public class MovieMapper {
                 .description(request.description())
                 .releaseDate(request.releaseDate())
                 .rating(request.rating())
-                .categories(
+                .categories(new ArrayList<>( // garante mutabilidade
                         request.categories().stream()
                                 .map(categoryId -> Category.builder().id(categoryId).build())
                                 .collect(Collectors.toList())
-                )
-                .streamings(
+                ))
+                .streamings(new ArrayList<>( // garante mutabilidade
                         request.streamings().stream()
                                 .map(streamingId -> Streaming.builder().id(streamingId).build())
                                 .collect(Collectors.toList())
-                )
+                ))
                 .build();
     }
 
